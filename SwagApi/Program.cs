@@ -1,4 +1,4 @@
-using SwagApi.ApplicationDbContext;
+using SwagApi.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

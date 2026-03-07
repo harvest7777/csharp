@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SwagApi.DTOs;
+using SwagApi.Data;
 
 namespace SwagApi.Controllers;
 
@@ -7,9 +8,9 @@ namespace SwagApi.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private readonly ApplicationDbContext.ApplicationDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public WeatherForecastController(ApplicationDbContext.ApplicationDbContext context)
+    public WeatherForecastController(ApplicationDbContext context)
     {
         _context = context;
     } 

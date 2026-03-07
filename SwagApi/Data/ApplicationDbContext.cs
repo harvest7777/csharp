@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace SwagApi.ApplicationDbContext;
+namespace SwagApi.Data;
 
 public class ApplicationDbContext : DbContext
 {
