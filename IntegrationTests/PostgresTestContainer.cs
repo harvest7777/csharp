@@ -1,6 +1,8 @@
 using Testcontainers.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using SwagApi.Data;
+using Respawn;
+using Npgsql;
 
 namespace IntegrationTests;
 
@@ -8,9 +10,10 @@ public class PostgresTestContainer : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _container;
 
-    public DbContextOptions<ApplicationDbContext> Options { get; private set; } = null!;
+    private Respawner _respawner = null!;
+    private string _connectionString = null!;
 
-    public string ConnectionString => _container.GetConnectionString();
+    public DbContextOptions<ApplicationDbContext> Options { get; private set; } = null!;
 
     public PostgresTestContainer()
     {
@@ -26,12 +29,33 @@ public class PostgresTestContainer : IAsyncLifetime
     {
         await _container.StartAsync();
 
+        _connectionString = _container.GetConnectionString();
+
         Options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(ConnectionString)
+            .UseNpgsql(_connectionString)
             .Options;
 
-        await using var context = new ApplicationDbContext(Options);
-        await context.Database.MigrateAsync();
+        // Apply migrations once
+        await using (var context = new ApplicationDbContext(Options))
+        {
+            await context.Database.MigrateAsync();
+        }
+
+        // Create respawner AFTER migrations
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(conn, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres
+        });
+    }
+
+    public async Task ResetDatabaseAsync()
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await _respawner.ResetAsync(conn);
     }
 
     public Task DisposeAsync()

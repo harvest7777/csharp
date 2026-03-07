@@ -1,36 +1,51 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SwagApi;
 using SwagApi.Data;
-
 namespace IntegrationTests;
+
 public class WeatherForecastIntegrationTests 
-    : IClassFixture<PostgresTestContainer>
+    : IClassFixture<PostgresTestContainer>, IAsyncLifetime
 {
-    private readonly DbContextOptions<ApplicationDbContext> _options;
+    private readonly PostgresTestContainer _fixture;
 
     public WeatherForecastIntegrationTests(PostgresTestContainer fixture)
     {
-        _options = fixture.Options;
+        _fixture = fixture;
     }
 
-    [Fact]
-    public async Task Should_Insert_WeatherForecast()
+    // Runs before each test
+    public async Task InitializeAsync()
     {
-        await using var context = new ApplicationDbContext(_options);
+        await _fixture.ResetDatabaseAsync();
+    }
+    
+    public Task DisposeAsync() => Task.CompletedTask;
 
-        var forecast = new WeatherForecast
+    [Fact]
+    public async Task Should_Insert_One_Record()
+    {
+        await using var context = new ApplicationDbContext(_fixture.Options);
+
+        context.WeatherForecasts.Add(new WeatherForecast
         {
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
-            TemperatureC = 30,
-            Summary = "Hot"
-        };
+            TemperatureC = 20,
+            Summary = "Mild"
+        });
 
-        context.WeatherForecasts.Add(forecast);
         await context.SaveChangesAsync();
 
-        var saved = await context.WeatherForecasts
-            .FirstOrDefaultAsync(x => x.Summary == "Hot");
+        var count = await context.WeatherForecasts.CountAsync();
 
-        Assert.NotNull(saved);
+        Assert.Equal(1, count);
+    }
+    [Fact]
+    public async Task Weather_Should_Be_Empty_Initially()
+    {
+        await using var context = new ApplicationDbContext(_fixture.Options);
+
+        var count = await context.WeatherForecasts.CountAsync();
+
+        Assert.Equal(0, count);
     }
 }
