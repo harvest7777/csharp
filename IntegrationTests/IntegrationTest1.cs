@@ -117,6 +117,7 @@ public class WeatherForecastIntegrationTests
 
         Assert.Equal(0, count);
     }
+    
     [Fact]
     public async Task Post_With_Invalid_Data_Types_Returns_400()
     {
