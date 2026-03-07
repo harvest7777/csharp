@@ -1,13 +1,16 @@
 using Testcontainers.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using SwagApi.Data;
+
 namespace IntegrationTests;
 
 public class PostgresTestContainer : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _container;
 
-    private string ConnectionString => _container.GetConnectionString();
+    public DbContextOptions<ApplicationDbContext> Options { get; private set; } = null!;
+
+    public string ConnectionString => _container.GetConnectionString();
 
     public PostgresTestContainer()
     {
@@ -23,17 +26,14 @@ public class PostgresTestContainer : IAsyncLifetime
     {
         await _container.StartAsync();
 
-        // Apply EF migrations automatically
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        Options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseNpgsql(ConnectionString)
             .Options;
 
-        await using var context = new ApplicationDbContext(options);
+        await using var context = new ApplicationDbContext(Options);
         await context.Database.MigrateAsync();
     }
 
-    public async Task DisposeAsync()
-    {
-        await _container.DisposeAsync();
-    }
+    public Task DisposeAsync()
+        => _container.DisposeAsync().AsTask();
 }

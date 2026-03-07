@@ -1,16 +1,36 @@
-﻿namespace IntegrationTests;
+﻿using Microsoft.EntityFrameworkCore;
+using SwagApi;
+using SwagApi.Data;
 
-public class IntegrationTest1
+namespace IntegrationTests;
+public class WeatherForecastIntegrationTests 
+    : IClassFixture<PostgresTestContainer>
 {
-    [Fact]
-    public void Test1()
+    private readonly DbContextOptions<ApplicationDbContext> _options;
+
+    public WeatherForecastIntegrationTests(PostgresTestContainer fixture)
     {
-        Assert.True(false);
+        _options = fixture.Options;
     }
-    
+
     [Fact]
-    public void Test2()
+    public async Task Should_Insert_WeatherForecast()
     {
-        Assert.True(true);
+        await using var context = new ApplicationDbContext(_options);
+
+        var forecast = new WeatherForecast
+        {
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TemperatureC = 30,
+            Summary = "Hot"
+        };
+
+        context.WeatherForecasts.Add(forecast);
+        await context.SaveChangesAsync();
+
+        var saved = await context.WeatherForecasts
+            .FirstOrDefaultAsync(x => x.Summary == "Hot");
+
+        Assert.NotNull(saved);
     }
 }
