@@ -153,4 +153,78 @@ public class WeatherForecastIntegrationTests
 
         Assert.Equal(beforeCount, afterCount);
     }
+    
+    [Fact]
+    public async Task Successful_Post_Should_Return_201_And_Location_Id_Should_Exist_In_DB()
+    {
+        // Arrange
+        var newWeatherDto = new WeatherForecastDto
+        {
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TemperatureC = 25,
+            Summary = "clear"
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync(
+            "/weatherforecast",
+            newWeatherDto);
+
+        // Assert 201
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+
+        // Extract ID from Location header
+        var location = response.Headers.Location;
+        Assert.NotNull(location);
+
+        var id = int.Parse(location.Segments.Last());
+
+        // Verify DB contains the inserted record
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var inserted = await context.WeatherForecasts.FindAsync(id);
+
+        Assert.NotNull(inserted);
+        Assert.Equal(newWeatherDto.Date, inserted.Date);
+        Assert.Equal(newWeatherDto.TemperatureC, inserted.TemperatureC);
+        Assert.Equal(newWeatherDto.Summary, inserted.Summary);
+    }
+    [Fact]
+    public async Task Post_Should_Return_Location_That_Points_To_Created_Resource()
+    {
+        // Arrange
+        var newWeatherDto = new WeatherForecastDto
+        {
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TemperatureC = 30,
+            Summary = "sunny"
+        };
+
+        // Act - create resource
+        var postResponse = await _client.PostAsJsonAsync(
+            "/weatherforecast",
+            newWeatherDto);
+
+        Assert.Equal(HttpStatusCode.Created, postResponse.StatusCode);
+        Assert.NotNull(postResponse.Headers.Location);
+
+        // Extract ID from Location header
+        var location = postResponse.Headers.Location!;
+        var id = int.Parse(location.Segments.Last());
+
+        // Act - follow Location
+        var getResponse = await _client.GetAsync(location);
+
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+
+        var returnedDto = await getResponse.Content
+            .ReadFromJsonAsync<WeatherForecastDto>();
+        
+        // We just made this resource, so getting it should exist again
+        Assert.NotNull(returnedDto);
+
+        // Assert the resource matches what we created
+        Assert.Equal(newWeatherDto.Date, returnedDto.Date);
+        Assert.Equal(newWeatherDto.TemperatureC, returnedDto.TemperatureC);
+        Assert.Equal(newWeatherDto.Summary, returnedDto.Summary);
+    } 
 }
