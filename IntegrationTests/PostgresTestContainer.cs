@@ -11,7 +11,7 @@ public class PostgresTestContainer : IAsyncLifetime
     private readonly PostgreSqlContainer _container;
 
     private Respawner _respawner = null!;
-    private string _connectionString = null!;
+    public string ConnectionString = null!;
 
     public DbContextOptions<ApplicationDbContext> Options { get; private set; } = null!;
 
@@ -29,10 +29,10 @@ public class PostgresTestContainer : IAsyncLifetime
     {
         await _container.StartAsync();
 
-        _connectionString = _container.GetConnectionString();
+        ConnectionString = _container.GetConnectionString();
 
         Options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseNpgsql(_connectionString)
+            .UseNpgsql(ConnectionString)
             .Options;
 
         // Apply migrations once
@@ -42,7 +42,7 @@ public class PostgresTestContainer : IAsyncLifetime
         }
 
         // Create respawner AFTER migrations
-        await using var conn = new NpgsqlConnection(_connectionString);
+        await using var conn = new NpgsqlConnection(ConnectionString);
         await conn.OpenAsync();
 
         _respawner = await Respawner.CreateAsync(conn, new RespawnerOptions
@@ -53,7 +53,7 @@ public class PostgresTestContainer : IAsyncLifetime
 
     public async Task ResetDatabaseAsync()
     {
-        await using var conn = new NpgsqlConnection(_connectionString);
+        await using var conn = new NpgsqlConnection(ConnectionString);
         await conn.OpenAsync();
         await _respawner.ResetAsync(conn);
     }

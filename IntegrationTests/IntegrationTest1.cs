@@ -7,6 +7,8 @@ public class WeatherForecastIntegrationTests
     : IClassFixture<PostgresTestContainer>, IAsyncLifetime
 {
     private readonly PostgresTestContainer _fixture;
+    private HttpClient _client;
+    private CustomWebApplicationFactory _factory;
 
     public WeatherForecastIntegrationTests(PostgresTestContainer fixture)
     {
@@ -16,7 +18,14 @@ public class WeatherForecastIntegrationTests
     // Runs before each test
     public async Task InitializeAsync()
     {
+        // It's important to reset the database because us tests are atomic and
+        // fully idempotent. 
         await _fixture.ResetDatabaseAsync();
+        
+        // It's really important we re-initialize the HTTP client because HTTP clients
+        // are stateful and can carry headers and cookies in between tests.
+        _factory = new CustomWebApplicationFactory(_fixture.ConnectionString);
+        _client = _factory.CreateClient();
     }
     
     public Task DisposeAsync() => Task.CompletedTask;
