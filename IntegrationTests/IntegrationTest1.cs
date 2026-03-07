@@ -37,6 +37,7 @@ public class WeatherForecastIntegrationTests
     [Fact]
     public async Task Post_Should_Insert_One_Record()
     {
+        // Arrange
         var newWeatherDto = new WeatherForecastDto
         {
             Date = DateOnly.FromDateTime(DateTime.UtcNow),
