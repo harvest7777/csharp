@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SwagApi.DTOs;
 using SwagApi.Data;
 
@@ -14,22 +15,11 @@ public class WeatherForecastController : ControllerBase
     {
         _context = context;
     } 
-    private static readonly string[] Summaries =
-    [
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    ];
 
     [HttpGet(Name = "GetWeatherForecast")]
     public async Task<ActionResult<WeatherForecastDto[]>> Get()
     {
-        await _context.Database.CanConnectAsync();
-        var res =  Enumerable.Range(1, 5).Select(index => new WeatherForecastDto
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+        var res = await _context.WeatherForecasts.ToArrayAsync();
         return Ok(res);
     }
 }
