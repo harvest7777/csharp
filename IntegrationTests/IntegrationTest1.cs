@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Net;
+using System.Net.Http.Json;
 using SwagApi;
 using SwagApi.Data;
+using SwagApi.DTOs;
+
 namespace IntegrationTests;
 
 public class WeatherForecastIntegrationTests 
@@ -59,5 +61,31 @@ public class WeatherForecastIntegrationTests
         Assert.Equal(0, count);
     }
 
+    [Fact]
+    public async Task Post_Should_Insert_One_Record()
+    {
+        var newWeatherDto = new WeatherForecastDto
+        {
+            Date = DateOnly.FromDateTime(DateTime.UtcNow),
+            TemperatureC = 20,
+            Summary = "test"
+        };
+        var response = await _client.PostAsJsonAsync(
+            "/weatherforecast",
+            newWeatherDto);
+        
+        // This should have inserted the new weather into the database. 
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var count = await context.WeatherForecasts.CountAsync();
+        Assert.Equal(1, count);
+        var weatherForecast = await context.WeatherForecasts.SingleAsync(w => w.Summary == "test");
+        var inserted = await context.WeatherForecasts
+            .SingleAsync(w => w.Summary == "test");
+
+        // The inserted weather forecast should be the same one that we made in the post request.
+        Assert.Equal(newWeatherDto.Date, inserted.Date);
+        Assert.Equal(newWeatherDto.TemperatureC, inserted.TemperatureC);
+        Assert.Equal(newWeatherDto.Summary, inserted.Summary);
+    }
     
 }
