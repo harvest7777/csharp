@@ -1,11 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Net;
 using System.Net.Http.Json;
-using SwagApi;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using SwagApi.Data;
 using SwagApi.DTOs;
-using System.Text;
-using System.Net;
-using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests;
 
@@ -188,6 +186,7 @@ public class WeatherForecastIntegrationTests
         Assert.Equal(newWeatherDto.TemperatureC, inserted.TemperatureC);
         Assert.Equal(newWeatherDto.Summary, inserted.Summary);
     }
+    
     [Fact]
     public async Task Post_Should_Return_Location_That_Points_To_Created_Resource()
     {
