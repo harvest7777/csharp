@@ -19,14 +19,16 @@ public class WeatherForecastController : ControllerBase
     ];
 
     [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecastDto> Get()
+    public async Task<ActionResult<WeatherForecastDto[]>> Get()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecastDto
+        await _context.Database.CanConnectAsync();
+        var res =  Enumerable.Range(1, 5).Select(index => new WeatherForecastDto
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
                 TemperatureC = Random.Shared.Next(-20, 55),
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        return Ok(res);
     }
 }

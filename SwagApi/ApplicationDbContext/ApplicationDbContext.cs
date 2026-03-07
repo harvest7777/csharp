@@ -8,4 +8,5 @@ public class ApplicationDbContext : DbContext
         : base(options)
     {
     }
+    public DbSet<WeatherForecast> WeatherForecasts { get; set; }
 }
