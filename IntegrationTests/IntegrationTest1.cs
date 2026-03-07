@@ -3,6 +3,9 @@ using System.Net.Http.Json;
 using SwagApi;
 using SwagApi.Data;
 using SwagApi.DTOs;
+using System.Text;
+using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests;
 
@@ -87,5 +90,95 @@ public class WeatherForecastIntegrationTests
         Assert.Equal(newWeatherDto.TemperatureC, inserted.TemperatureC);
         Assert.Equal(newWeatherDto.Summary, inserted.Summary);
     }
+
+    [Fact]
+    public async Task Malformed_Post_Body_Returns_400()
+    {
+        // Arrange: deliberately malformed JSON (missing closing brace)
+        var malformedJson = "{ \"date\": \"2024-01-01\", \"temperatureC\": 20, \"summary\": \"test\" ";
+
+        var content = new StringContent(
+            malformedJson,
+            Encoding.UTF8,
+            "application/json");
+
+        // Act
+        var response = await _client.PostAsync(
+            "/weatherforecast",
+            content);
+
+        // Assert HTTP status
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        // Assert DB was NOT modified
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var count = await context.WeatherForecasts.CountAsync();
+
+        Assert.Equal(0, count);
+    } 
     
+    [Fact]
+    public async Task Post_With_Missing_Date_Returns_400()
+    {
+        // Arrange: valid JSON but missing "date"
+        var invalidJson = """
+                          {
+                              "temperatureC": 25,
+                              "summary": "test"
+                          }
+                          """;
+
+        var content = new StringContent(
+            invalidJson,
+            Encoding.UTF8,
+            "application/json");
+
+        // Act
+        var response = await _client.PostAsync(
+            "/weatherforecast",
+            content);
+
+        // Assert HTTP status
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        // Assert DB unchanged
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var count = await context.WeatherForecasts.CountAsync();
+
+        Assert.Equal(0, count);
+    }
+    [Fact]
+    public async Task Post_With_Invalid_Data_Types_Returns_400()
+    {
+        // Arrange — capture initial state
+        await using var beforeContext = new ApplicationDbContext(_fixture.Options);
+        var beforeCount = await beforeContext.WeatherForecasts.CountAsync();
+
+        var invalidJson = """
+                          {
+                              "date": "not-a-date",
+                              "temperatureC": "abc",
+                              "summary": "test"
+                          }
+                          """;
+
+        var content = new StringContent(
+            invalidJson,
+            Encoding.UTF8,
+            "application/json");
+
+        // Act
+        var response = await _client.PostAsync(
+            "/weatherforecast",
+            content);
+
+        // Assert status
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        // Assert DB unchanged
+        await using var afterContext = new ApplicationDbContext(_fixture.Options);
+        var afterCount = await afterContext.WeatherForecasts.CountAsync();
+
+        Assert.Equal(beforeCount, afterCount);
+    }
 }
