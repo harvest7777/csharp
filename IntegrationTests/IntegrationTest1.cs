@@ -44,6 +44,8 @@ public class WeatherForecastIntegrationTests
             TemperatureC = 20,
             Summary = "test"
         };
+        
+        // Act
         var response = await _client.PostAsJsonAsync(
             "/weatherforecast",
             newWeatherDto);
