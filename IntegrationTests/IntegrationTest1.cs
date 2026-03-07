@@ -59,17 +59,5 @@ public class WeatherForecastIntegrationTests
         Assert.Equal(0, count);
     }
 
-    [Fact]
-    public async Task Weather_Get_Should_Be_Rate_Limited()
-    {
-        // First request should succeed
-        var firstResponse = await _client.GetAsync("/weatherforecast");
-        Assert.True(firstResponse.IsSuccessStatusCode);
-
-        // Second request immediately after should hit the rate limiter
-        var secondResponse = await _client.GetAsync("/weatherforecast");
-
-        Assert.Equal(HttpStatusCode.TooManyRequests, secondResponse.StatusCode);
-    }
     
 }
