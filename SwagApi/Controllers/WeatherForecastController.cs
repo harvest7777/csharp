@@ -7,6 +7,12 @@ namespace SwagApi.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
+    private readonly ApplicationDbContext.ApplicationDbContext _context;
+
+    public WeatherForecastController(ApplicationDbContext.ApplicationDbContext context)
+    {
+        _context = context;
+    } 
     private static readonly string[] Summaries =
     [
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
