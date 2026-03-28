@@ -9,5 +9,6 @@
     &lt;TestId&gt;xUnit::69000141-3569-42A4-831D-30D01EBFF065::net10.0::IntegrationTests.WeatherForecastIntegrationTests&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::14AFC60A-8B3A-4F81-B182-7A74C315BBD1::net10.0::SwagApi.UnitTests.UnitTest1.Test1&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::14AFC60A-8B3A-4F81-B182-7A74C315BBD1::net10.0::SwagApi.UnitTests.Articles.UnitTest1&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::14AFC60A-8B3A-4F81-B182-7A74C315BBD1::net10.0::SwagApi.UnitTests.Articles.ArticleTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

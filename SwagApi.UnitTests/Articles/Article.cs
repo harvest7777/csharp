@@ -64,4 +64,18 @@ public class ArticleTests
         // Assert
         Assert.Equal(ArticleStatus.Published, article.Status);
     }
+
+    [Fact]
+    public void Update_ShouldChange_UpdatedAt()
+    {
+        // Arrange
+        var article = new Article();
+        var before = article.UpdatedAt;
+
+        // Act
+        article.Update("My Title", "Some content", "my-title");
+
+        // Assert
+        Assert.NotEqual(before, article.UpdatedAt);
+    }
 }
