@@ -24,11 +24,24 @@ public class Article
 
     public void Update(string? title, string? content, string? slug)
     {
-        throw new NotImplementedException();
+        if (title?.Length > 255)
+            throw new ArgumentException("Title is too long.", nameof(title));
+
+        Title = title;
+        Content = content;
+        Slug = slug;
+        UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
     }
 
     public void Publish()
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(Title))
+            throw new InvalidOperationException("Title is required.");
+
+        if (string.IsNullOrEmpty(Content))
+            throw new InvalidOperationException("Content is required.");
+
+        Status = ArticleStatus.Published;
+        PublishedAt = DateOnly.FromDateTime(DateTime.UtcNow);
     }
 }
