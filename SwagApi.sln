@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwagApi", "SwagApi\SwagApi.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{69000141-3569-42A4-831D-30D01EBFF065}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwagApi.UnitTests", "SwagApi.UnitTests\SwagApi.UnitTests.csproj", "{14AFC60A-8B3A-4F81-B182-7A74C315BBD1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{69000141-3569-42A4-831D-30D01EBFF065}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69000141-3569-42A4-831D-30D01EBFF065}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69000141-3569-42A4-831D-30D01EBFF065}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14AFC60A-8B3A-4F81-B182-7A74C315BBD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14AFC60A-8B3A-4F81-B182-7A74C315BBD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14AFC60A-8B3A-4F81-B182-7A74C315BBD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14AFC60A-8B3A-4F81-B182-7A74C315BBD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
