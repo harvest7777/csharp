@@ -33,6 +33,8 @@ public class ArticleTests
     {
         // Arrange
         var article = new Article();
+        article.Update(null, "Valid content", "valid-slug");
+
 
         // Assert
         Assert.Throws<InvalidOperationException>(() => article.Publish());
