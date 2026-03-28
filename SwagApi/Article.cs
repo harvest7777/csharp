@@ -32,5 +32,3 @@ public class Article
         throw new NotImplementedException();
     }
 }
-
-}
