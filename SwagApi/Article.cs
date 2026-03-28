@@ -12,9 +12,9 @@ public class Article
 
     public ArticleStatus Status { get; private set; } =  ArticleStatus.Draft;
 
-    public DateOnly? PublishedAt { get; private set; }
+    public DateTime? PublishedAt { get; private set; }
 
-    public DateOnly UpdatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
     public string? Content { get; private set; }
 
@@ -30,8 +30,10 @@ public class Article
         Title = title;
         Content = content;
         Slug = slug;
-        UpdatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+        Touch();
     }
+
+    private void Touch() => UpdatedAt = DateTime.UtcNow;
 
     public void Publish()
     {
@@ -42,6 +44,6 @@ public class Article
             throw new InvalidOperationException("Content is required.");
 
         Status = ArticleStatus.Published;
-        PublishedAt = DateOnly.FromDateTime(DateTime.UtcNow);
+        PublishedAt = DateTime.UtcNow;
     }
 }
