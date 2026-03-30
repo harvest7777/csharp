@@ -27,9 +27,9 @@ public class Article
         if (title?.Length > 255)
             throw new ArgumentException("Title is too long.", nameof(title));
 
-        Title = title;
-        Content = content;
-        Slug = slug;
+        if (title != null) Title = title;
+        if (content != null) Content = content;
+        if (slug != null) Slug = slug;
         Touch();
     }
 
