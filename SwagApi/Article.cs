@@ -54,6 +54,8 @@ public class Article
 
     public void Delete()
     {
-        throw new NotImplementedException();
+        if (IsDeleted) return;
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
     }
 }
