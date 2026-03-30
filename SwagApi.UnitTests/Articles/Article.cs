@@ -66,6 +66,48 @@ public class ArticleTests
     }
 
     [Fact]
+    public void Update_ShouldNot_NullifyTitle_WhenTitleOmitted()
+    {
+        // Arrange
+        var article = new Article();
+        article.Update("My Title", "Some content", "my-slug");
+
+        // Act
+        article.Update(null, "New content", "new-slug");
+
+        // Assert
+        Assert.Equal("My Title", article.Title);
+    }
+
+    [Fact]
+    public void Update_ShouldNot_NullifyContent_WhenContentOmitted()
+    {
+        // Arrange
+        var article = new Article();
+        article.Update("My Title", "Some content", "my-slug");
+
+        // Act
+        article.Update("New Title", null, "new-slug");
+
+        // Assert
+        Assert.Equal("Some content", article.Content);
+    }
+
+    [Fact]
+    public void Update_ShouldNot_NullifySlug_WhenSlugOmitted()
+    {
+        // Arrange
+        var article = new Article();
+        article.Update("My Title", "Some content", "my-slug");
+
+        // Act
+        article.Update("New Title", "New content", null);
+
+        // Assert
+        Assert.Equal("my-slug", article.Slug);
+    }
+
+    [Fact]
     public void Update_ShouldChange_UpdatedAt()
     {
         // Arrange
