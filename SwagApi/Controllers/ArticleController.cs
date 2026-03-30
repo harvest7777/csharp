@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SwagApi.DTOs;
 using SwagApi.Data;
+using SwagApi.DTOs;
 
 namespace SwagApi.Controllers;
 
@@ -17,10 +17,16 @@ public class ArticleController : ControllerBase
     } 
 
     [HttpGet(Name = "GetArticles")]
-    public async Task<ActionResult<ArticleDto[]>> Get()
+    public async Task<ActionResult<ArticleDto[]>> Get([FromQuery] string status = "active")
     {
-        var res = await _context.Articles.ToArrayAsync();
-        return Ok(res);
+        var query = status switch
+        {
+            "deleted" => _context.Articles.IgnoreQueryFilters().Where(a => a.IsDeleted),
+            "all"     => _context.Articles.IgnoreQueryFilters(),
+            // This also handles nonsense values like "foo" or lack of query param
+            _         => _context.Articles.Where(a => !a.IsDeleted)
+        };
+        return Ok(await query.ToArrayAsync());
     }
 
     [HttpGet("{id}", Name = "GetArticle")]
