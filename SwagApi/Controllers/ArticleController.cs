@@ -40,4 +40,23 @@ public class ArticleController : ControllerBase
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetById), new { id = newArticle.Id }, newArticle);
     }
+
+
+    [HttpPut("{id}", Name = "PutArticle")]
+
+    public async Task<ActionResult<ArticleDto>> Put(int id, [FromBody] PutArticleDto dto)
+    {
+        // EF will get a tracked version of the article object which has a mapping to the database
+        var article = await _context.Articles.FindAsync(id);
+
+        if (article == null)
+            return NotFound();
+
+        // Literally stages updates into the database just from using C# methods!
+        article.Update(dto.Title, dto.Content, dto.Slug);
+
+        // Blocking write
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
 }
