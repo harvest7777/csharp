@@ -51,4 +51,9 @@ public class Article
         Status = ArticleStatus.Published;
         PublishedAt = DateTime.UtcNow;
     }
+
+    public void Delete()
+    {
+        throw new NotImplementedException();
+    }
 }
