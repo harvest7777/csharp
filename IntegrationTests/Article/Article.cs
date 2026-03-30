@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using SwagApi.Data;
 using SwagApi.DTOs;
@@ -34,8 +33,14 @@ public class ArticleIntegrationTests
 
     public Task DisposeAsync() => Task.CompletedTask;
 
+    private async Task<int> CreateArticleAsync(PostArticleDto dto)
+    {
+        var response = await _client.PostAsJsonAsync("/article", dto);
+        return int.Parse(response.Headers.Location!.Segments.Last());
+    }
+
     [Fact]
-    public async Task Post_Should_InsertRecord_WhenValidDto()
+    public async Task Post_Should_InsertRecord_WhenValid()
     {
         // Arrange
         var newArticleDto = new PostArticleDto
@@ -53,6 +58,7 @@ public class ArticleIntegrationTests
         // This should have inserted the new article into the database.
         await using var context = new ApplicationDbContext(_fixture.Options);
         var count = await context.Articles.CountAsync();
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         Assert.Equal(1, count);
 
         var id = int.Parse(response.Headers.Location!.Segments.Last());
@@ -60,7 +66,7 @@ public class ArticleIntegrationTests
         var inserted = await context.Articles
             .SingleAsync(w => w.Id == id);
 
-        // The inserted weather forecast should be the same one that we made in the post request.
+        // The inserted article should be the same one that we made in the post request.
         Assert.Equal(newArticleDto.Title, inserted.Title);
         Assert.Equal(newArticleDto.Content, inserted.Content);
         Assert.Equal(newArticleDto.Slug, inserted.Slug);
@@ -69,42 +75,152 @@ public class ArticleIntegrationTests
     [Fact]
     public async Task Put_Should_UpdateFields_WhenArticleExists()
     {
+        // Arrange
+        var id = await CreateArticleAsync(new PostArticleDto
+        {
+            Title = "Original Title",
+            Content = "Original Content",
+            Slug = "original-slug"
+        });
 
+        var updateDto = new PutArticleDto
+        {
+            Title = "Updated Title",
+            Content = "Updated Content",
+            Slug = "updated-slug"
+        };
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/article/{id}", updateDto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var article = await context.Articles.SingleAsync(a => a.Id == id);
+        Assert.Equal(updateDto.Title, article.Title);
+        Assert.Equal(updateDto.Content, article.Content);
+        Assert.Equal(updateDto.Slug, article.Slug);
     }
 
     [Fact]
     public async Task Put_ShouldNot_NullifyFields_WhenFieldsOmitted()
     {
+        // Arrange
+        var id = await CreateArticleAsync(new PostArticleDto
+        {
+            Title = "Original Title",
+            Content = "Original Content",
+            Slug = "original-slug"
+        });
 
+        // Act — only send title, omit content and slug
+        var response = await _client.PutAsJsonAsync($"/article/{id}", new PutArticleDto
+        {
+            Title = "Updated Title"
+        });
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var article = await context.Articles.SingleAsync(a => a.Id == id);
+        Assert.Equal("Original Content", article.Content);
+        Assert.Equal("original-slug", article.Slug);
     }
 
     [Fact]
     public async Task Put_Should_ReturnNotFound_WhenArticleDoesNotExist()
     {
+        // Arrange
+        var dto = new PutArticleDto { Title = "Title", Content = "Content", Slug = "slug" };
 
+        // Act
+        var response = await _client.PutAsJsonAsync("/article/999", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
     public async Task Get_Should_ReturnArticle_WhenArticleExists()
-    {}
+    {
+        // Arrange
+        var id = await CreateArticleAsync(new PostArticleDto
+        {
+            Title = "Test Article",
+            Content = "Test Content",
+            Slug = "test-article"
+        });
+
+        // Act
+        var response = await _client.GetAsync($"/article/{id}");
+        var article = await response.Content.ReadFromJsonAsync<ArticleDto>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Test Article", article!.Title);
+        Assert.Equal("Test Content", article.Content);
+        Assert.Equal("test-article", article.Slug);
+    }
 
     [Fact]
     public async Task Get_Should_ReturnNotFound_WhenArticleDoesNotExist()
-    {}
+    {
+        // Act
+        var response = await _client.GetAsync("/article/999");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 
     [Fact]
     public async Task Delete_Should_DeleteArticle_WhenArticleExists()
-    {}
+    {
+        // Arrange
+        var id = await CreateArticleAsync(new PostArticleDto
+        {
+            Title = "To Delete",
+            Content = "Content",
+            Slug = "to-delete"
+        });
+
+        // Act
+        var response = await _client.DeleteAsync($"/article/{id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var exists = await context.Articles.AnyAsync(a => a.Id == id);
+        Assert.False(exists);
+    }
 
     [Fact]
     public async Task Delete_Should_ReturnNoContent_WhenArticleExists()
     {
+        // Arrange
+        var id = await CreateArticleAsync(new PostArticleDto
+        {
+            Title = "To Delete",
+            Content = "Content",
+            Slug = "to-delete"
+        });
 
+        // Act
+        var response = await _client.DeleteAsync($"/article/{id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]
     public async Task Delete_Should_ReturnNotFound_WhenArticleDoesNotExist()
     {
+        // Act
+        var response = await _client.DeleteAsync("/article/999");
 
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }
