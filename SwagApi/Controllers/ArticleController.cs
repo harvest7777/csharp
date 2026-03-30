@@ -42,6 +42,16 @@ public class ArticleController : ControllerBase
     }
 
 
+    [HttpDelete("{id}", Name = "DeleteArticle")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var article = await _context.Articles.FindAsync(id);
+        if (article is null) return NotFound();
+        _context.Articles.Remove(article);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpPut("{id}", Name = "PutArticle")]
 
     public async Task<ActionResult<ArticleDto>> Put(int id, [FromBody] PutArticleDto dto)
