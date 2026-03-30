@@ -1,12 +1,28 @@
 namespace SwagApi.DTOs;
 
-public class WeatherForecastDto
+public class PostArticleDto
 {
-    public DateOnly Date { get; set; }
+    public string? Title { get; set; }
+    public string? Content { get; set; }
+    public string? Slug { get; set; }
+}
+public class PutArticleDto
+{
+    public string? Title { get; set; }
+    public string? Content { get; set; }
+    public string? Slug { get; set; }
+}
+public class ArticleDto
+{
+    public ArticleStatus Status { get; set; }
 
-    public int TemperatureC { get; set; }
+    public DateTime? PublishedAt { get; set; }
 
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public DateTime UpdatedAt { get; set; }
 
-    public string? Summary { get; set; }
+    public string? Content { get; set; }
+
+    public string? Title { get; set; }
+
+    public string? Slug { get; set; }
 }
