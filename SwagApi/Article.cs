@@ -16,7 +16,7 @@ public class Article
 
     public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
-    public bool IsDeleted { get; private set; } = False;
+    public bool IsDeleted { get; private set; } = false;
 
     public DateTime? DeletedAt { get; private set; }
 

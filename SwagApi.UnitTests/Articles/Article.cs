@@ -120,4 +120,46 @@ public class ArticleTests
         // Assert
         Assert.NotEqual(before, article.UpdatedAt);
     }
+
+    [Fact]
+    public void Delete_Should_BeIdempotent()
+    {
+        // Arrange
+        var article = new Article();
+        article.Delete();
+        var oldDeletedAt = article.DeletedAt;
+
+        // Act
+        article.Delete();
+
+        // Assert
+        Assert.True(article.IsDeleted);
+        Assert.Equal(oldDeletedAt, article.DeletedAt);
+    }
+
+    [Fact]
+    public void Delete_Should_SetDeletedAt()
+    {
+        // Arrange
+        var article = new Article();
+
+        // Act
+        article.Delete();
+
+        // Assert
+        Assert.NotNull(article.DeletedAt);
+    }
+
+    [Fact]
+    public void Delete_Should_SetIsDeleted()
+    {
+        // Arrange
+        var article = new Article();
+
+        // Act
+        article.Delete();
+
+        // Assert
+        Assert.True(article.IsDeleted);
+    }
 }
