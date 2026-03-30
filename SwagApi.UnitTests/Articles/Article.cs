@@ -101,7 +101,7 @@ public class ArticleTests
         article.Update("My Title", "Some content", "my-slug");
 
         // Act
-        article.Update("New Title", "New content", null);
+        article.Update("New Title", "New content" );
 
         // Assert
         Assert.Equal("my-slug", article.Slug);

@@ -22,7 +22,7 @@ public class Article
 
     public string? Slug { get; private set; }
 
-    public void Update(string? title, string? content, string? slug)
+    public void Update(string? title = null, string? content = null, string? slug = null)
     {
         if (title?.Length > 255)
             throw new ArgumentException("Title is too long.", nameof(title));
