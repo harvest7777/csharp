@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
+using SwagApi;
 using SwagApi.Data;
 using SwagApi.DTOs;
 
@@ -172,6 +173,120 @@ public class ArticleIntegrationTests
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_Should_ReturnOnlyActiveArticles_WhenStatusIsActive()
+    {
+        // Arrange — seed one active and one deleted
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var active = new Article();
+        active.Update("Active Article", "Content", "active");
+        var deleted = new Article();
+        deleted.Update("Deleted Article", "Content", "deleted");
+        deleted.Delete();
+        context.Articles.AddRange(active, deleted);
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/article?status=active");
+        var articles = await response.Content.ReadFromJsonAsync<ArticleDto[]>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, articles!.Length);
+        Assert.Equal("Active Article", articles[0].Title);
+    }
+
+    [Fact]
+    public async Task Get_Should_ReturnOnlyActiveArticles_WhenNoStatusParameter()
+    {
+        // Arrange — seed one active and one deleted
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var active = new Article();
+        active.Update("Active Article", "Content", "active");
+        var deleted = new Article();
+        deleted.Update("Deleted Article", "Content", "deleted");
+        deleted.Delete();
+        context.Articles.AddRange(active, deleted);
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/article");
+        var articles = await response.Content.ReadFromJsonAsync<ArticleDto[]>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, articles!.Length);
+        Assert.Equal("Active Article", articles[0].Title);
+    }
+
+    [Fact]
+    public async Task Get_Should_ReturnOnlyActiveArticles_WhenNonsenseStatusParameter()
+    {
+        // Arrange — seed one active and one deleted
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var active = new Article();
+        active.Update("Active Article", "Content", "active");
+        var deleted = new Article();
+        deleted.Update("Deleted Article", "Content", "deleted");
+        deleted.Delete();
+        context.Articles.AddRange(active, deleted);
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/article?status=foo");
+        var articles = await response.Content.ReadFromJsonAsync<ArticleDto[]>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, articles!.Length);
+        Assert.Equal("Active Article", articles[0].Title);
+    }
+
+    [Fact]
+    public async Task Get_Should_ReturnAllArticles_WhenStatusIsAll()
+    {
+        // Arrange — seed one active and one deleted
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var active = new Article();
+        active.Update("Active Article", "Content", "active");
+        var deleted = new Article();
+        deleted.Update("Deleted Article", "Content", "deleted");
+        deleted.Delete();
+        context.Articles.AddRange(active, deleted);
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/article?status=all");
+        var articles = await response.Content.ReadFromJsonAsync<ArticleDto[]>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(2, articles!.Length);
+    }
+
+    [Fact]
+    public async Task Get_Should_ReturnDeletedArticles_WhenStatusIsDeleted()
+    {
+        // Arrange — seed one active and one deleted
+        await using var context = new ApplicationDbContext(_fixture.Options);
+        var active = new Article();
+        active.Update("Active Article", "Content", "active");
+        var deleted = new Article();
+        deleted.Update("Deleted Article", "Content", "deleted");
+        deleted.Delete();
+        context.Articles.AddRange(active, deleted);
+        await context.SaveChangesAsync();
+
+        // Act
+        var response = await _client.GetAsync("/article?status=deleted");
+        var articles = await response.Content.ReadFromJsonAsync<ArticleDto[]>();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(1, articles!.Length);
+        Assert.Equal("Deleted Article", articles[0].Title);
     }
 
     [Fact]
