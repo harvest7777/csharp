@@ -19,7 +19,9 @@ public class ArticleDto
     public DateTime? PublishedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+    public bool IsDeleted { get; private set; } = false;
 
+    public DateTime? DeletedAt { get; private set; }
     public string? Content { get; set; }
 
     public string? Title { get; set; }

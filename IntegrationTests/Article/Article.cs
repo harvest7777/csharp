@@ -241,7 +241,8 @@ public class ArticleIntegrationTests
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(1, articles!.Length);
-        Assert.Equal("Active Article", articles[0].Title);
+        Assert.All(articles, a => Assert.Equal("Active Article", a.Title));
+
     }
 
     [Fact]
