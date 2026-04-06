@@ -59,6 +59,26 @@ namespace SwagApi.Migrations
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("SwagApi.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Auth0Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("SwagApi.WeatherForecast", b =>
                 {
                     b.Property<int>("Id")
