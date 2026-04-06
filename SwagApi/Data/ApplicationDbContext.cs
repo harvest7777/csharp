@@ -10,4 +10,9 @@ public class ApplicationDbContext : DbContext
     }
     public DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public DbSet<Article> Articles { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Article>().HasQueryFilter(a => !a.IsDeleted);
+    }
 }

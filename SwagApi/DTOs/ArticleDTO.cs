@@ -14,15 +14,17 @@ public class PutArticleDto
 }
 public class ArticleDto
 {
-    public ArticleStatus Status { get; set; }
+    public ArticleStatus Status { get; init; }
 
-    public DateTime? PublishedAt { get; set; }
+    public DateTime? PublishedAt { get; init; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; init; }
+    public bool IsDeleted { get; init; };
 
-    public string? Content { get; set; }
+    public DateTime? DeletedAt { get; init; }
+    public string? Content { get; init; }
 
-    public string? Title { get; set; }
+    public string? Title { get; init; }
 
-    public string? Slug { get; set; }
+    public string? Slug { get; init; }
 }

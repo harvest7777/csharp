@@ -16,11 +16,16 @@ public class Article
 
     public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
 
+    public bool IsDeleted { get; private set; } = false;
+
+    public DateTime? DeletedAt { get; private set; }
+
     public string? Content { get; private set; }
 
     public string? Title { get; private set; }
 
     public string? Slug { get; private set; }
+
 
     public void Update(string? title = null, string? content = null, string? slug = null)
     {
@@ -45,5 +50,12 @@ public class Article
 
         Status = ArticleStatus.Published;
         PublishedAt = DateTime.UtcNow;
+    }
+
+    public void Delete()
+    {
+        if (IsDeleted) return;
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
     }
 }
