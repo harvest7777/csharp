@@ -7,6 +7,8 @@ using SwagApi.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+ILogger logger = factory.CreateLogger("API");
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -24,7 +26,25 @@ builder.Services.AddAuth0ApiAuthentication(options =>
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.JwtBearerOptions = new JwtBearerOptions
     {
-        Audience = builder.Configuration["Auth0:Audience"]
+        Audience = builder.Configuration["Auth0:Audience"],
+        Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                logger.LogInformation("Token Validated {Token}...",  context.SecurityToken.ToString().Substring(0,10));
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                logger.LogInformation("Authentication Failed {Error}...",  context.Exception);
+                return Task.CompletedTask;
+            },
+            OnForbidden = context =>
+            {
+                logger.LogInformation("Forbidden {Reason}...",  context.Result.Failure);
+                return Task.CompletedTask;
+            }
+        }
     };
 });
 
@@ -53,11 +73,15 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseRequestAuth();
 
 app.UseRateLimiter();
 
