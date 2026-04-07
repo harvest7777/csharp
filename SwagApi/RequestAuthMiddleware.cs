@@ -11,8 +11,11 @@ public class RequestAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context, UserResolver userResolver)
     {
-        var user = await userResolver.GetOrCreateUser();
-        context.Items["CurrentUser"] = user;
+        if (context.User.Identity.IsAuthenticated)
+        {
+            var user = await userResolver.GetOrCreateUser();
+            context.Items["CurrentUser"] = user;
+        }
         await _next(context);
     }
 }
