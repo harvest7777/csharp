@@ -7,10 +7,6 @@ using SwagApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-ILogger logger = factory.CreateLogger("API");
-
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -33,17 +29,17 @@ builder.Services.AddAuth0ApiAuthentication(options =>
         {
             OnTokenValidated = context =>
             {
-                logger.LogInformation("Token Validated {Token}...",  context.SecurityToken.ToString().Substring(0,10));
+                Console.WriteLine($"[TOKEN VALIDATED] {context.SecurityToken.ToString().Substring(0, 10)}...");
                 return Task.CompletedTask;
             },
             OnAuthenticationFailed = context =>
             {
-                logger.LogInformation("Authentication Failed {Error}...",  context.Exception);
+                Console.WriteLine($"[AUTH FAILED] {context.Exception}");
                 return Task.CompletedTask;
             },
             OnForbidden = context =>
             {
-                logger.LogInformation("Forbidden {Reason}...",  context.Result.Failure);
+                Console.WriteLine($"[FORBIDDEN] {context.Result.Failure}");
                 return Task.CompletedTask;
             }
         }

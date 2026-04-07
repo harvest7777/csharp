@@ -11,7 +11,7 @@ public class RequestAuthMiddleware
 
     public async Task InvokeAsync( HttpContext context, UserResolver userResolver)
     {
-        await userResolver.GetOrCreateUserId();
+        await userResolver.GetOrCreateUser();
         //
         // Call the next delegate/middleware in the pipeline.
         await _next(context);
