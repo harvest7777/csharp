@@ -1,6 +1,4 @@
-using System.Security.Claims;
-
-namespace Middleware.Example;
+namespace SwagApi;
 
 public class RequestAuthMiddleware
 {
@@ -11,11 +9,10 @@ public class RequestAuthMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync( HttpContext context, UserResolver userResolver)
     {
-        var sub = context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        bool isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
-
+        await userResolver.GetOrCreateUserId();
+        //
         // Call the next delegate/middleware in the pipeline.
         await _next(context);
     }

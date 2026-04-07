@@ -2,6 +2,7 @@ using System.Threading.RateLimiting;
 using Auth0.AspNetCore.Authentication.Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using SwagApi;
 using SwagApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ ILogger logger = factory.CreateLogger("API");
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddHttpContextAccessor();
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -64,6 +66,8 @@ builder.Services.AddRateLimiter(options =>
             }));
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
+
+builder.Services.AddScoped<UserResolver>();
 
 var app = builder.Build();
 
