@@ -1,7 +1,5 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SwagApi.Data;
 
 namespace SwagApi.Controllers;
@@ -21,8 +19,9 @@ public class MeController : ControllerBase
     [HttpGet(Name = "GetMe")]
     public async Task<ActionResult<User>> Get()
     {
-        string Auth0Id = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Auth0Id == Auth0Id);
+        User? user = HttpContext.Items["CurrentUser"] as User;
+        if (user == null)
+            return Unauthorized();
         return Ok(user);
     }
 }
