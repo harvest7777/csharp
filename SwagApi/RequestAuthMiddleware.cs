@@ -11,7 +11,8 @@ public class RequestAuthMiddleware
 
     public async Task InvokeAsync(HttpContext context, UserResolver userResolver)
     {
-        if (context.User.Identity.IsAuthenticated)
+        bool isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
+        if (isAuthenticated)
         {
             var user = await userResolver.GetOrCreateUser();
             context.Items["CurrentUser"] = user;
