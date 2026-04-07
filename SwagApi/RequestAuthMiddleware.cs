@@ -9,11 +9,10 @@ public class RequestAuthMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync( HttpContext context, UserResolver userResolver)
+    public async Task InvokeAsync(HttpContext context, UserResolver userResolver)
     {
-        await userResolver.GetOrCreateUser();
-        //
-        // Call the next delegate/middleware in the pipeline.
+        var user = await userResolver.GetOrCreateUser();
+        context.Items["CurrentUser"] = user;
         await _next(context);
     }
 }

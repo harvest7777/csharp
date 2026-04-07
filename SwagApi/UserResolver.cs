@@ -11,8 +11,8 @@ public class UserResolver
 
     public UserResolver(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
     {
-        this._db = db;
-        this._httpContextAccessor = httpContextAccessor;
+        _db = db;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<User> GetOrCreateUser()
@@ -20,10 +20,8 @@ public class UserResolver
         var auth0Id = GetAuth0Id() ?? throw new UnauthorizedAccessException("No Auth0 Id found in claims.");
         User foundUser = await _db.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id);
 
-
         if (foundUser != null)
         {
-            _httpContextAccessor.HttpContext.Items["CurrentUser"] = foundUser;
             return foundUser;
         }
 
@@ -33,7 +31,6 @@ public class UserResolver
         };
         _db.Users.Add(newUser);
         await _db.SaveChangesAsync();
-        _httpContextAccessor.HttpContext.Items["CurrentUser"] = newUser;
         return newUser;
     }
 
