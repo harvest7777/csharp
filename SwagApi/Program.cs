@@ -1,15 +1,16 @@
-using System.Net;
 using System.Threading.RateLimiting;
-using SwagApi.Data;
+using Auth0.AspNetCore.Authentication.Api;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using SwagApi;
+using SwagApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddHttpContextAccessor();
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -17,6 +18,35 @@ var connectionString =
                                            + "'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddAuth0ApiAuthentication(options =>
+{
+    options.Domain = builder.Configuration["Auth0:Domain"];
+    options.JwtBearerOptions = new JwtBearerOptions
+    {
+        Audience = builder.Configuration["Auth0:Audience"],
+        Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine($"[TOKEN VALIDATED] {context.SecurityToken.ToString().Substring(0, 10)}...");
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"[AUTH FAILED] {context.Exception}");
+                return Task.CompletedTask;
+            },
+            OnForbidden = context =>
+            {
+                Console.WriteLine($"[FORBIDDEN] {context.Result.Failure}");
+                return Task.CompletedTask;
+            }
+        }
+    };
+});
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -33,6 +63,8 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
+builder.Services.AddScoped<UserResolver>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,7 +75,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
+app.UseRequestAuth();
 
 app.UseRateLimiter();
 
