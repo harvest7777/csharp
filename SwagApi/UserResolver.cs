@@ -6,22 +6,24 @@ namespace SwagApi;
 
 public class UserResolver
 {
-    private ApplicationDbContext db;
-    private IHttpContextAccessor httpContextAccessor;
+    private readonly ApplicationDbContext _db;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserResolver(ApplicationDbContext db, IHttpContextAccessor httpContextAccessor)
     {
-        this.db = db;
-        this.httpContextAccessor = httpContextAccessor;
+        this._db = db;
+        this._httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<User> GetOrCreateUserId()
+    public async Task<User> GetOrCreateUser()
     {
         var auth0Id = GetAuth0Id() ?? throw new UnauthorizedAccessException("No Auth0 Id found in claims.");
-        User foundUser = await db.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id);
+        User foundUser = await _db.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id);
+
 
         if (foundUser != null)
         {
+            _httpContextAccessor.HttpContext.Items["CurrentUser"] = foundUser;
             return foundUser;
         }
 
@@ -29,14 +31,15 @@ public class UserResolver
         {
             Auth0Id = auth0Id,
         };
-        db.Users.Add(newUser);
-        await db.SaveChangesAsync();
+        _db.Users.Add(newUser);
+        await _db.SaveChangesAsync();
+        _httpContextAccessor.HttpContext.Items["CurrentUser"] = newUser;
         return newUser;
     }
 
     private string? GetAuth0Id()
     {
-        var sub = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var sub = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return sub;
     }
 }
