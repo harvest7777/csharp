@@ -19,7 +19,7 @@ public class ArticleDto
     public DateTime? PublishedAt { get; init; }
 
     public DateTime UpdatedAt { get; init; }
-    public bool IsDeleted { get; init; };
+    public bool IsDeleted { get; init; }
 
     public DateTime? DeletedAt { get; init; }
     public string? Content { get; init; }
